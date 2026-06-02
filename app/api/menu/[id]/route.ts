@@ -2,13 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { BASE_API_URL } from "@/global"
 import { getServerCookie } from "@/lib/server.cookie"
 
-// PUT edit menu
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }   // ← ubah jadi Promise
-) {
+type Params = { params: Promise<{ id: string }> }
+
+export async function PUT(req: NextRequest, context: Params) {
   try {
-    const { id } = await params                     // ← await params
+    const { id } = await context.params
     const token = await getServerCookie("token")
     const formData = await req.formData()
     const res = await fetch(`${BASE_API_URL}/api/menu/${id}`, {
@@ -23,13 +21,9 @@ export async function PUT(
   }
 }
 
-// DELETE hapus menu
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }   // ← ubah jadi Promise
-) {
+export async function DELETE(_req: NextRequest, context: Params) {
   try {
-    const { id } = await params                     // ← await params
+    const { id } = await context.params
     const token = await getServerCookie("token")
     const res = await fetch(`${BASE_API_URL}/api/menu/${id}`, {
       method: "DELETE",

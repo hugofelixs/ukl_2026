@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { BASE_API_URL } from "@/global"
 import { getServerCookie } from "@/lib/server.cookie"
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+type Params = { params: Promise<{ id: string }> }
+
+export async function PUT(req: NextRequest, context: Params) {
   try {
-    const { id } = await params
+    const { id } = await context.params
     const token = await getServerCookie("token")
     const body = await req.json()
     const res = await fetch(`${BASE_API_URL}/api/diskon/${id}`, {
@@ -25,12 +24,9 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_req: NextRequest, context: Params) {
   try {
-    const { id } = await params
+    const { id } = await context.params
     const token = await getServerCookie("token")
     const res = await fetch(`${BASE_API_URL}/api/diskon/${id}`, {
       method: "DELETE",
