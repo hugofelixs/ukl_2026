@@ -2,26 +2,16 @@ import { NextRequest, NextResponse } from "next/server"
 import { BASE_API_URL } from "@/global"
 import { getServerCookie } from "@/lib/server.cookie"
 
-export async function GET() {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const token = await getServerCookie("token")
-    const res = await fetch(`${BASE_API_URL}/api/diskon`, {
-      headers: { authorization: `Bearer ${token}` },
-      cache: "no-store",
-    })
-    const data = await res.json()
-    return NextResponse.json(data, { status: res.status })
-  } catch {
-    return NextResponse.json({ message: "Gagal memuat diskon" }, { status: 500 })
-  }
-}
-
-export async function POST(req: NextRequest) {
-  try {
+    const { id } = await params
     const token = await getServerCookie("token")
     const body = await req.json()
-    const res = await fetch(`${BASE_API_URL}/api/diskon`, {
-      method: "POST",
+    const res = await fetch(`${BASE_API_URL}/api/diskon/${id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         authorization: `Bearer ${token}`,
@@ -31,6 +21,24 @@ export async function POST(req: NextRequest) {
     const data = await res.json()
     return NextResponse.json(data, { status: res.status })
   } catch {
-    return NextResponse.json({ message: "Gagal menambahkan diskon" }, { status: 500 })
+    return NextResponse.json({ message: "Gagal memperbarui diskon" }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const token = await getServerCookie("token")
+    const res = await fetch(`${BASE_API_URL}/api/diskon/${id}`, {
+      method: "DELETE",
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    return NextResponse.json(data, { status: res.status })
+  } catch {
+    return NextResponse.json({ message: "Gagal menghapus diskon" }, { status: 500 })
   }
 }

@@ -4,12 +4,13 @@ import { getServerCookie } from "@/lib/server.cookie"
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = await getServerCookie("token")
     const body = await req.json()
-    const res = await fetch(`${BASE_API_URL}/api/transaksi/${params.id}/status`, {
+    const res = await fetch(`${BASE_API_URL}/api/transaksi/${id}/status`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
