@@ -287,7 +287,7 @@ export default function ProfilClient({ initialSiswa }: { initialSiswa: Siswa | n
                 Username
               </label>
               <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-gray-400 text-sm">
-                {siswa?.username ?? "-"}
+                {siswa?.user?.username ?? "-"}
               </div>
             </div>
 

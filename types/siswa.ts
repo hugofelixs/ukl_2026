@@ -1,9 +1,13 @@
 export interface Siswa {
   id: number
-  username: string
   nama_siswa: string
   alamat?: string
   telp?: string
   foto?: string
-  saldo: number
+  saldo?: number
+  user?: {
+    username: string
+    role?: string
+  }
+  // ... properti lain jika ada
 }
