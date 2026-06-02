@@ -238,9 +238,9 @@ export default function RegisterAdminPage() {
           )}
         </div>
 
-        <p className="text-center text-white/30 text-sm mt-6">
+        <p className="text-center text-[#0055a4]/50 text-sm mt-6">
           Sudah punya akun?{" "}
-          <Link href="/login" className="text-amber-400 hover:text-amber-300 transition-colors">
+          <Link href="/login" className="text-[#0055a4] hover:text-[#004483] transition-colors">
             Masuk di sini
           </Link>
         </p>
