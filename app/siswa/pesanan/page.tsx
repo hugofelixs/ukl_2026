@@ -1,0 +1,20 @@
+import { getServerCookie } from "@/lib/server.cookie"
+import { BASE_API_URL } from "@/global"
+import PesananClient from "./PesananClient"
+import { Transaksi } from "@/types/transaksi"
+
+export default async function PesananPage() {
+  try {
+    const token = await getServerCookie("token")
+    const res = await fetch(`${BASE_API_URL}/api/transaksi/history`, {
+      headers: { authorization: `Bearer ${token}` },
+      cache: "no-store",
+    })
+    const json = await res.json()
+    const transaksis: Transaksi[] = Array.isArray(json) ? json : json.data ?? []
+    const aktif = transaksis.filter((t) => t.status !== "sampai")
+    return <PesananClient initialPesanan={aktif} />
+  } catch {
+    return <PesananClient initialPesanan={[]} />
+  }
+}
