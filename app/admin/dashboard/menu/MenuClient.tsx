@@ -313,7 +313,7 @@ export default function MenuClient({ initialMenus }: { initialMenus: Menu[] }) {
 
   return (
     // ✨ Ubah dari px-8 menjadi pl-0 pr-8, sama seperti ProfilClient
-    <div className="py-8 w-full pl-0 pr-8">
+    <div className="px-4 md:px-8 py-6 w-full">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-5 right-5 z-[60] px-5 py-3 rounded-xl text-sm font-medium shadow-lg ${toast.type === "ok" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"}`}>
@@ -342,7 +342,7 @@ export default function MenuClient({ initialMenus }: { initialMenus: Menu[] }) {
           <p className="text-[#004483]/35 text-sm">Belum ada menu. Tambahkan menu pertamamu!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
           {menus.map((menu) => {
             const hargaDiskon = getHargaDiskon(menu)
             const diskon = menu.menu_diskon?.[0]?.diskon

@@ -72,7 +72,7 @@ export default function ProfilClient({ initialProfil }: { initialProfil: Stan | 
 
   return (
     // ✨ FULL WIDTH – menempel ke kiri, padding kanan & vertikal saja
-    <div className="py-8 w-full pl-0 pr-8">
+    <div className="px-4 md:px-8 py-6 w-full">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-5 right-5 z-[60] px-5 py-3 rounded-xl text-sm font-medium shadow-lg ${toast.type === "ok" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"}`}>

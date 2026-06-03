@@ -199,7 +199,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="pl-36 pr-8 py-8 w-full">
+    <div className="px-4 md:px-8 py-6 w-full">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-[#004483] text-xl font-semibold">Dashboard</h1>
@@ -209,7 +209,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total Menu" value={stats?.totalMenu ?? 0} sub="item tersedia" icon="🍔" />
         <StatCard label="Transaksi Hari Ini" value={stats?.totalTransaksiHariIni ?? 0} sub="pesanan masuk" icon="🧾" />
         <StatCard label="Pemasukan Bulan Ini" value={formatRupiah(stats?.pemasukanBulanIni ?? 0)} sub={bulanLabel} icon="💰" />

@@ -306,7 +306,7 @@ export default function TransaksiClient({ initialTransaksis }: { initialTransaks
   }
 
   return (
-    <div className="py-8 w-full pl-0 pr-8">
+    <div className="px-4 md:px-8 py-6 w-full">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-5 right-5 z-[60] px-5 py-3 rounded-xl text-sm font-medium shadow-lg ${toast.type === "ok" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"}`}>
@@ -321,7 +321,7 @@ export default function TransaksiClient({ initialTransaksis }: { initialTransaks
       </div>
 
       {/* Filter */}
-      <div className="flex items-center gap-3 mb-8 flex-wrap">
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
         <select
           value={filterBulan}
           onChange={(e) => setFilterBulan(Number(e.target.value))}
@@ -356,7 +356,7 @@ export default function TransaksiClient({ initialTransaksis }: { initialTransaks
           <p className="text-[#004483]/35 text-sm">Belum ada transaksi pada periode ini</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto">
           {(Object.entries(grouped) as [StatusPesanan, Transaksi[]][]).map(([status, items]) => {
             const cfg = statusConfig[status]
             return (
