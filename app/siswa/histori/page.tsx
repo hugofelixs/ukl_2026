@@ -2,13 +2,17 @@ import { getServerCookie } from "@/lib/server.cookie"
 import { BASE_API_URL } from "@/global"
 import HistoriClient from "./HistoriClient"
 import { Transaksi } from "@/types/transaksi"
+import { redirect } from "next/navigation"
 
 export default async function HistoriPage() {
+  const token = await getServerCookie("token")
+
+  if (!token) redirect("/login")
+
   try {
     const now = new Date()
     const bulan = now.getMonth() + 1
     const tahun = now.getFullYear()
-    const token = await getServerCookie("token")
     const res = await fetch(
       `${BASE_API_URL}/api/transaksi/history?bulan=${bulan}&tahun=${tahun}`,
       {

@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { BASE_API_URL } from "@/global"
 import { getClientCookie } from "@/lib/client.cookie"
 
-// Perluas interface untuk mencakup detail_transaksi
 interface DetailTransaksiItem {
   id: number
   id_menu: number
@@ -18,10 +18,10 @@ interface Transaksi {
   id: number
   id_siswa: number
   siswa?: { nama_siswa: string }
-  status: "belum_dikonfirm" | "dimasak" | "diantar" | "sampai"
+  status: StatusPesanan
   total?: number
   tanggal: string
-  detail_transaksi?: DetailTransaksiItem[] // tambahan
+  detail_transaksi?: DetailTransaksiItem[]
 }
 
 interface Stats {
@@ -48,10 +48,9 @@ function formatWaktu(iso: string) {
   })
 }
 
-const statusConfig: Record<
-  Transaksi["status"],
-  { label: string; dot: string; badge: string }
-> = {
+type StatusPesanan = "belum_dikonfirm" | "dimasak" | "diantar" | "sampai"
+
+const statusConfig: Record<StatusPesanan, { label: string; dot: string; badge: string }> = {
   belum_dikonfirm: { label: "Menunggu", dot: "bg-amber-400", badge: "bg-amber-400/10 text-amber-500 border-amber-400/20" },
   dimasak: { label: "Dimasak", dot: "bg-orange-400", badge: "bg-orange-400/10 text-orange-500 border-orange-400/20" },
   diantar: { label: "Diantar", dot: "bg-blue-400", badge: "bg-blue-400/10 text-blue-500 border-blue-400/20" },
@@ -76,24 +75,15 @@ function StatCard({ label, value, sub, icon }: {
   )
 }
 
-async function fetchWithToken(url: string) {
-  const token = getClientCookie("token")
-  const res = await fetch(url, {
-    headers: { authorization: `Bearer ${token}` },
-    cache: "no-store",
-  })
-  return res.json()
-}
-
-// Helper untuk menghitung total dari detail_transaksi
 function getTotalTransaksi(t: Transaksi): number {
   if (t.detail_transaksi && t.detail_transaksi.length > 0) {
-    return t.detail_transaksi.reduce((sum, item) => sum + (item.harga_beli * item.qty), 0)
+    return t.detail_transaksi.reduce((sum, item) => sum + item.harga_beli * item.qty, 0)
   }
   return t.total ?? 0
 }
 
 export default function DashboardPage() {
+  const router = useRouter()
   const [stats, setStats] = useState<Stats | null>(null)
   const [transaksi, setTransaksi] = useState<Transaksi[]>([])
   const [loading, setLoading] = useState(true)
@@ -105,12 +95,17 @@ export default function DashboardPage() {
   const bulanLabel = now.toLocaleDateString("id-ID", { month: "long", year: "numeric" })
 
   useEffect(() => {
+    const token = getClientCookie("token")
+    if (!token) {
+      router.push("/login")
+      return
+    }
+
     async function fetchData() {
       try {
         setLoading(true)
         const token = getClientCookie("token")
 
-        // Fetch profil stan dulu untuk dapat id_stan
         const profilRes = await fetch(`${BASE_API_URL}/api/stan/admin/profile`, {
           headers: { authorization: `Bearer ${token}` },
           cache: "no-store",
@@ -169,7 +164,7 @@ export default function DashboardPage() {
     }
 
     fetchData()
-  }, [bulan, tahun])
+  }, [bulan, tahun, router])
 
   if (loading) {
     return (
@@ -200,7 +195,6 @@ export default function DashboardPage() {
 
   return (
     <div className="px-4 md:px-8 py-6 w-full">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-[#004483] text-xl font-semibold">Dashboard</h1>
         <p className="text-[#004483]/40 text-sm mt-1">
@@ -208,7 +202,6 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total Menu" value={stats?.totalMenu ?? 0} sub="item tersedia" icon="🍔" />
         <StatCard label="Transaksi Hari Ini" value={stats?.totalTransaksiHariIni ?? 0} sub="pesanan masuk" icon="🧾" />
@@ -216,14 +209,10 @@ export default function DashboardPage() {
         <StatCard label="Perlu Konfirmasi" value={stats?.menungguKonfirmasi ?? 0} sub="pesanan menunggu" icon="⏳" />
       </div>
 
-      {/* Recent Transactions */}
       <div className="bg-white/40 border border-white/50 rounded-2xl overflow-hidden shadow-lg">
         <div className="px-6 py-4 border-b border-white/40 flex items-center justify-between">
           <h2 className="text-[#004483] text-sm font-semibold">Transaksi Terbaru</h2>
-          <Link
-            href="/admin/dashboard/transaksi"
-            className="text-[#004483]/50 text-xs hover:text-[#004483] transition-colors"
-          >
+          <Link href="/admin/dashboard/transaksi" className="text-[#004483]/50 text-xs hover:text-[#004483] transition-colors">
             Lihat semua →
           </Link>
         </div>
@@ -235,7 +224,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            <div className="px-6 py-2.5 grid grid-cols-[3rem_1fr_auto_7rem] gap-4 border-b border-white/30">
+            <div className="hidden md:grid px-6 py-2.5 grid-cols-[3rem_1fr_auto_7rem] gap-4 border-b border-white/30">
               <p className="text-[#004483]/40 text-xs">ID</p>
               <p className="text-[#004483]/40 text-xs">Pelanggan</p>
               <p className="text-[#004483]/40 text-xs text-right">Status</p>
@@ -245,31 +234,42 @@ export default function DashboardPage() {
             <div className="divide-y divide-white/30">
               {transaksi.map((t) => {
                 const cfg = statusConfig[t.status] ?? statusConfig.belum_dikonfirm
-                const total = getTotalTransaksi(t) // hitung ulang
+                const total = getTotalTransaksi(t)
                 return (
-                  <div
-                    key={t.id}
-                    className="px-6 py-4 grid grid-cols-[3rem_1fr_auto_7rem] gap-4 items-center hover:bg-white/20 transition-colors"
-                  >
-                    <p className="text-[#004483]/30 text-xs font-mono">#{t.id}</p>
-
-                    <div>
-                      <p className="text-[#004483] text-sm font-medium">
-                        {t.siswa?.nama_siswa ?? `Siswa #${t.id_siswa}`}
-                      </p>
-                      <p className="text-[#004483]/40 text-xs mt-0.5">
-                        {formatWaktu(t.tanggal)}
+                  <div key={t.id} className="px-4 md:px-6 py-4 hover:bg-white/20 transition-colors">
+                    {/* Mobile layout */}
+                    <div className="flex items-center justify-between md:hidden">
+                      <div>
+                        <p className="text-[#004483] text-sm font-medium">
+                          {t.siswa?.nama_siswa ?? `Siswa #${t.id_siswa}`}
+                        </p>
+                        <p className="text-[#004483]/40 text-xs mt-0.5">{formatWaktu(t.tanggal)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[#004483] text-sm font-semibold">{formatRupiah(total)}</p>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border mt-1 ${cfg.badge}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                          {cfg.label}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Desktop layout */}
+                    <div className="hidden md:grid grid-cols-[3rem_1fr_auto_7rem] gap-4 items-center">
+                      <p className="text-[#004483]/30 text-xs font-mono">#{t.id}</p>
+                      <div>
+                        <p className="text-[#004483] text-sm font-medium">
+                          {t.siswa?.nama_siswa ?? `Siswa #${t.id_siswa}`}
+                        </p>
+                        <p className="text-[#004483]/40 text-xs mt-0.5">{formatWaktu(t.tanggal)}</p>
+                      </div>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${cfg.badge}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                        {cfg.label}
+                      </span>
+                      <p className="text-[#004483] text-sm font-semibold tabular-nums text-right">
+                        {formatRupiah(total)}
                       </p>
                     </div>
-
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${cfg.badge}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                      {cfg.label}
-                    </span>
-
-                    <p className="text-[#004483] text-sm font-semibold tabular-nums text-right">
-                      {formatRupiah(total)}
-                    </p>
                   </div>
                 )
               })}

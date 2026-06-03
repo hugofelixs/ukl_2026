@@ -2,10 +2,14 @@ import { getServerCookie } from "@/lib/server.cookie"
 import { BASE_API_URL } from "@/global"
 import PesananClient from "./PesananClient"
 import { Transaksi } from "@/types/transaksi"
+import { redirect } from "next/navigation"
 
 export default async function PesananPage() {
+  const token = await getServerCookie("token")
+
+  if (!token) redirect("/login")
+
   try {
-    const token = await getServerCookie("token")
     const res = await fetch(`${BASE_API_URL}/api/transaksi/history`, {
       headers: { authorization: `Bearer ${token}` },
       cache: "no-store",
